@@ -7,8 +7,12 @@ import {
     Button,
     Alert,
     Typography,
-    Link
+    Link,
+    IconButton,
+    InputAdornment
 } from "@mui/material";
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 import chatLogo from "../assets/Chatlogo.png";
 
@@ -17,6 +21,7 @@ const Login = (props) => {
     const [roomName, setRoomName] = useState("");
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [localError, setLocalError] = useState("");
 
@@ -49,8 +54,21 @@ const Login = (props) => {
                 <TextField fullWidth label="User Name" value={userName} onChange={e => setUserName(e.target.value)}
                     sx={{ mb: "1em" }}
                 />
-                <TextField fullWidth label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)}
+                <TextField fullWidth label="Password" type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
                     sx={{ mb: "1em" }}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    edge="end"
+                                >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        )
+                    }}
                 />
                 <TextField fullWidth label="Room Name" value={roomName} onChange={e => setRoomName(e.target.value)}
                     sx={{ mb: "1em" }}
