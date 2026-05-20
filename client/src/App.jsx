@@ -11,7 +11,7 @@ const theme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
-            main: "#9c27b0"
+            main: "#90caf9" // A softer, modern blue that looks great in dark mode
         },
         background: {
             default: "#121212",
