@@ -92,9 +92,11 @@ io.on("connect", socket => {
             io.to(roomName).emit("room update", { users: data.getRoomUsers(roomName) });
         });
 
-        socket.on("message", async text => {
+        socket.on("message", async payload => {
             const { roomName, userName, color } = socket.data;
-            const messageInfo = { sender: userName, text, color };
+            const text = typeof payload === "string" ? payload : payload.text;
+            const isImage = typeof payload === "string" ? false : payload.isImage;
+            const messageInfo = { sender: userName, text, color, isImage };
             await data.addMessage(roomName, messageInfo);
             io.to(roomName).emit("chat update", await data.roomLog(roomName));
         });

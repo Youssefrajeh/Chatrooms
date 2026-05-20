@@ -40,14 +40,14 @@ function App() {
     const [roomUsers, setRoomUsers] = useState([]);
     const [typingUsers, setTypingUsers] = useState([]);
 
-    const sendMessage = (text) => {
-        if (text.startsWith('/edit ')) {
+    const sendMessage = (text, isImage = false) => {
+        if (typeof text === "string" && text.startsWith('/edit ')) {
             const editedText = text.substring(6);
             socket.current.emit("edit", { roomName: joinInfo.roomName, userName: joinInfo.userName, text: editedText });
-        } else if (text === '/del' || text.startsWith('/del ')) {
+        } else if (typeof text === "string" && (text === '/del' || text.startsWith('/del '))) {
             socket.current.emit("delete", { roomName: joinInfo.roomName, userName: joinInfo.userName });
         } else {
-            socket.current.send(text);
+            socket.current.emit("message", { text, isImage });
         }
     }
 

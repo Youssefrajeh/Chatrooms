@@ -14,12 +14,16 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
+    IconButton
 } from "@mui/material";
 
 import SendIcon from '@mui/icons-material/Send';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import EmojiPicker from 'emoji-picker-react';
 import * as fns from "date-fns";
 
 const Chat = (props) => {
@@ -29,6 +33,7 @@ const Chat = (props) => {
     /* Menu */
 
     const [menuOpen, setMenuOpen] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     const renderMenu = () => {
         return (
@@ -114,10 +119,14 @@ const Chat = (props) => {
                     <Typography variant="h6" className="message-text" sx={{ color: message.color }}>
                         <strong>{message.sender}</strong>
                     </Typography>
-                    <Typography variant="h6" className="message-text">
-                        {message.deletedAt ? "" : message.text}
-                    </Typography>
-                    <Typography variant="h6" sx={{ textAlign: "right" }}>
+                    {message.isImage && !message.deletedAt ? (
+                        <img src={message.text} alt="Upload" style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: "8px", marginTop: "4px" }} />
+                    ) : (
+                        <Typography variant="h6" className="message-text">
+                            {message.deletedAt ? "" : message.text}
+                        </Typography>
+                    )}
+                    <Typography variant="body2" sx={{ textAlign: "right", marginTop: "4px", color: "gray" }}>
                         { message.deletedAt && <span>(deleted) </span> }
                         { message.editAt && !message.deletedAt && <span>(edited) </span> }
                         <i>{messageTimestamp}</i>
@@ -177,6 +186,7 @@ const Chat = (props) => {
         if (!messageText) return;
         props.sendMessage(messageText);
         setMessageText('');
+        setShowEmojiPicker(false);
         
         const { userName, roomName } = props;
         props.notifyTyping && props.notifyTyping({ roomName, userName, isTyping: false });
@@ -194,6 +204,25 @@ const Chat = (props) => {
             props.notifyTyping && props.notifyTyping(typingInfo);
         }
     }
+
+    const onEmojiClick = (emojiObject) => {
+        setMessageText(prev => prev + emojiObject.emoji);
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Reset the input value so the same file can be selected again
+        e.target.value = null;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result;
+            props.sendMessage(base64String, true);
+        };
+        reader.readAsDataURL(file);
+    };
 
     return (
         <Paper elevation={4} sx={{ mt: "0.5em", display: "flex", flexDirection: "column" }}>
@@ -219,7 +248,31 @@ const Chat = (props) => {
                     {renderChatLog()}
                 </List>
                 <Divider />
-                <Box sx={{ mt: "1em", display: "flex", direction: "row", flex: 1 }}>
+                <Box sx={{ mt: "1em", display: "flex", direction: "row", flex: 1, position: "relative" }}>
+                    
+                    {showEmojiPicker && (
+                        <Box sx={{ position: "absolute", bottom: "100%", left: "0", zIndex: 1000, mb: 1 }}>
+                            <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" />
+                        </Box>
+                    )}
+
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        style={{ display: "none" }} 
+                        id="image-upload-input" 
+                        onChange={handleImageUpload} 
+                    />
+                    <label htmlFor="image-upload-input">
+                        <IconButton component="span" sx={{ mr: 1, mt: 1 }}>
+                            <AttachFileIcon />
+                        </IconButton>
+                    </label>
+
+                    <IconButton onClick={() => setShowEmojiPicker(prev => !prev)} sx={{ mr: 1, mt: 1 }}>
+                        <EmojiEmotionsIcon />
+                    </IconButton>
+
                     <TextField fullWidth sx={{ mr: "1em", flex: 9 }}
                         value={messageText} onChange={handleMessageTextChange}
                         onKeyDown={e => {
@@ -228,7 +281,7 @@ const Chat = (props) => {
                             }
                         }}
                     />
-                    <Button fullWidth variant="contained" sx={{ flex: 1 }} onClick={handleSendMessage}>
+                    <Button variant="contained" sx={{ flex: 1 }} onClick={handleSendMessage}>
                         <SendIcon />
                     </Button>
                 </Box>

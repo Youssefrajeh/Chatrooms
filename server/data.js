@@ -12,7 +12,8 @@ const messageSchema = new mongoose.Schema({
     color: { type: String },
     timestamp: { type: Number },
     editAt: { type: Number },
-    deletedAt: { type: Number }
+    deletedAt: { type: Number },
+    isImage: { type: Boolean, default: false }
 });
 
 export const User = mongoose.model('User', userSchema);
